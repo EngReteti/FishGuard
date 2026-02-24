@@ -16,3 +16,6 @@ From the project root, use:
 - **Language**: Java 17
 - **Environment**: Termux (Mobile Development)
 - **Version Control**: Git & GitHub
+## 📅 Roadmap
+- [x] Phase 1: Environment & Architecture (12%)
+- [ ] Phase 2: Alert Systems & Data Collections (Current)
