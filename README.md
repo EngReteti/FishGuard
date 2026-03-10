@@ -19,3 +19,6 @@ From the project root, use:
 ## 📅 Roadmap
 - [x] Phase 1: Environment & Architecture (12%)
 - [ ] Phase 2: Alert Systems & Data Collections (Current)
+
+## 🐍 Python Integration
+- **scripts/sensor_sim.py**: Simulates IoT sensor data for local testing.
