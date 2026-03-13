@@ -1,21 +1,21 @@
-import random
+import socket
 import time
 
-"""
-FishGuard Mock Sensor Simulator (Session 8)
-This script simulates a real hardware sensor sending water metrics.
-"""
+def send_test_reading():
+    # Configuration
+    host = '127.0.0.1'
+    port = 5000
+    data = "26.5,7.2,4.2" # Simulated Temp, pH, Oxygen
 
-def generate_metrics():
-    # Simulating realistic pond values
-    temp = round(random.uniform(24.0, 30.0), 1)
-    ph = round(random.uniform(6.0, 9.0), 1)
-    oxygen = round(random.uniform(3.0, 8.0), 1)
-    
-    return f"{temp},{ph},{oxygen}"
+    try:
+        # Create a socket and connect to Java
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            print(f"[SENSOR]: Connecting to Java server at {host}:{port}...")
+            s.connect((host, port))
+            s.sendall(data.encode())
+            print(f"[SENSOR]: Data sent successfully: {data}")
+    except ConnectionRefusedError:
+        print("[ERROR]: Java server is not running!")
 
 if __name__ == "__main__":
-    print("--- FishGuard Sensor Simulation Started ---")
-    # Generating a test reading
-    reading = generate_metrics()
-    print(f"Generated Reading: {reading}")
+    send_test_reading()
