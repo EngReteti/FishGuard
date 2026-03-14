@@ -4,8 +4,8 @@ import java.io.*;
 import java.net.*;
 
 /**
- * NetworkManager handles the communication between the Python sensor and Java.
- * Session 11: Accepting incoming connections.
+ * NetworkManager handles the communication between Python and Java.
+ * Session 12: Continuous Monitoring Loop.
  */
 public class NetworkManager {
     private ServerSocket serverSocket;
@@ -15,33 +15,30 @@ public class NetworkManager {
         this.port = port;
     }
 
-    /**
-     * Starts the server and waits for a connection.
-     */
     public void startServer() {
         try {
             serverSocket = new ServerSocket(port);
-            System.out.println("[SERVER]: FishGuard is online on port " + port + "...");
-            System.out.println("[SERVER]: Waiting for sensor to connect...");
+            System.out.println("[SERVER]: FishGuard Live Monitor active on port " + port + "...");
 
-            // This line tells Java to wait for a "Client" (our Python script)
-            Socket clientSocket = serverSocket.accept();
-            System.out.println("[SERVER]: Sensor connected from: " + clientSocket.getInetAddress());
-
-            // Prepare to read data from the connection
-            BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            String rawData = in.readLine();
-            
-            if (rawData != null) {
-                System.out.println("[RECEIVED]: Raw data stream -> " + rawData);
-                // Process the data using our existing parser
-                WaterMetrics reading = new WaterMetrics(rawData);
-                new AlertSystem().checkMetrics(reading);
+            // The loop keeps the server running indefinitely
+            while (true) {
+                System.out.println("\n[SERVER]: Waiting for next reading...");
+                
+                try (Socket clientSocket = serverSocket.accept();
+                     BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))) {
+                    
+                    String rawData = in.readLine();
+                    if (rawData != null) {
+                        System.out.println("[RECEIVED]: " + rawData);
+                        WaterMetrics reading = new WaterMetrics(rawData);
+                        new AlertSystem().checkMetrics(reading);
+                    }
+                } catch (IOException e) {
+                    System.out.println("[ERROR]: Individual connection failed: " + e.getMessage());
+                }
             }
-
-            clientSocket.close();
         } catch (IOException e) {
-            System.out.println("[ERROR]: Network failure: " + e.getMessage());
+            System.out.println("[ERROR]: Server failed: " + e.getMessage());
         }
     }
 }

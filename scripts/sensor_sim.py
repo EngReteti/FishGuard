@@ -1,21 +1,29 @@
 import socket
 import time
+import random
 
-def send_test_reading():
-    # Configuration
+def generate_metrics():
+    temp = round(random.uniform(24.0, 30.0), 1)
+    ph = round(random.uniform(6.0, 9.0), 1)
+    oxygen = round(random.uniform(3.0, 8.0), 1)
+    return f"{temp},{ph},{oxygen}"
+
+def start_sensor():
     host = '127.0.0.1'
     port = 5000
-    data = "26.5,7.2,4.2" # Simulated Temp, pH, Oxygen
+    print("--- FishGuard Sensor Started (Press Ctrl+C to stop) ---")
 
-    try:
-        # Create a socket and connect to Java
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            print(f"[SENSOR]: Connecting to Java server at {host}:{port}...")
-            s.connect((host, port))
-            s.sendall(data.encode())
-            print(f"[SENSOR]: Data sent successfully: {data}")
-    except ConnectionRefusedError:
-        print("[ERROR]: Java server is not running!")
+    while True:
+        data = generate_metrics()
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.connect((host, port))
+                s.sendall(data.encode())
+                print(f"[SENSOR]: Sent -> {data}")
+        except ConnectionRefusedError:
+            print("[WAITING]: Java server not ready. Retrying...")
+        
+        time.sleep(5) # Wait 5 seconds before next reading
 
 if __name__ == "__main__":
-    send_test_reading()
+    start_sensor()
