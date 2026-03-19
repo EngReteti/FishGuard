@@ -11,19 +11,22 @@ def generate_metrics():
 def start_sensor():
     host = '127.0.0.1'
     port = 5000
-    print("--- FishGuard Sensor Started (Press Ctrl+C to stop) ---")
+    print("--- FishGuard Sensor Started ---")
 
     while True:
         data = generate_metrics()
         try:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 s.connect((host, port))
-                s.sendall(data.encode())
-                print(f"[SENSOR]: Sent -> {data}")
+                s.sendall(data.encode() + b'\n')
+                
+                # Wait for the confirmation from Java
+                response = s.recv(1024).decode()
+                print(f"[SENSOR]: Sent {data} | Server Response: {response}")
         except ConnectionRefusedError:
-            print("[WAITING]: Java server not ready. Retrying...")
+            print("[WAITING]: Java server not ready...")
         
-        time.sleep(5) # Wait 5 seconds before next reading
+        time.sleep(5)
 
 if __name__ == "__main__":
     start_sensor()
