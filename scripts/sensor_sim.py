@@ -11,20 +11,21 @@ def generate_metrics():
 def start_sensor():
     host = '127.0.0.1'
     port = 5000
-    print("--- FishGuard Sensor Started ---")
+    auth_key = "FISH_SECURE_123"
 
     while True:
         data = generate_metrics()
         try:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 s.connect((host, port))
-                s.sendall(data.encode() + b'\n')
+                # Send the key first, then the data
+                message = f"{auth_key}\n{data}\n"
+                s.sendall(message.encode())
                 
-                # Wait for the confirmation from Java
                 response = s.recv(1024).decode()
-                print(f"[SENSOR]: Sent {data} | Server Response: {response}")
+                print(f"[SENSOR]: {response}")
         except ConnectionRefusedError:
-            print("[WAITING]: Java server not ready...")
+            print("[WAITING]...")
         
         time.sleep(5)
 

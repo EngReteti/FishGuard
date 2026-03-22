@@ -4,12 +4,13 @@ import java.io.*;
 import java.net.*;
 
 /**
- * ClientHandler manages an individual sensor connection on a separate thread.
- * Session 15: Added Bidirectional Response logic.
+ * ClientHandler with Basic Authentication.
+ * Session 16: Security Gate added.
  */
 public class ClientHandler implements Runnable {
     private Socket socket;
     private NetworkManager manager;
+    private static final String SECRET_KEY = "FISH_SECURE_123";
 
     public ClientHandler(Socket socket, NetworkManager manager) {
         this.socket = socket;
@@ -21,26 +22,24 @@ public class ClientHandler implements Runnable {
         try (BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
              PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
             
-            String rawData = in.readLine();
-            if (rawData != null) {
+            String authHeader = in.readLine(); // First line should be the key
+            String rawData = in.readLine();    // Second line is the metrics
+
+            if (SECRET_KEY.equals(authHeader) && rawData != null) {
                 WaterMetrics reading = new WaterMetrics(rawData);
-                System.out.println("\n[THREAD " + Thread.currentThread().getId() + "]: Processing " + rawData);
+                System.out.println("\n[AUTH SUCCESS]: Processing data from Thread " + Thread.currentThread().getId());
                 
-                // Process and Log
                 new AlertSystem().checkMetrics(reading);
                 manager.logData(reading);
-
-                // Send confirmation back to the Python Sensor
-                out.println("ACK: Data received and logged successfully.");
+                out.println("ACK: Data Verified and Logged.");
+            } else {
+                System.out.println("[AUTH FAILED]: Unauthorized connection attempt blocked.");
+                out.println("ERROR: Unauthorized Access.");
             }
         } catch (IOException e) {
-            System.out.println("[ERROR]: Thread error: " + e.getMessage());
+            System.out.println("[ERROR]: Connection error: " + e.getMessage());
         } finally {
-            try {
-                socket.close();
-            } catch (IOException e) {
-                // Socket already closed
-            }
+            try { socket.close(); } catch (IOException e) { }
         }
     }
 }
