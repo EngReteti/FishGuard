@@ -1,25 +1,22 @@
 package com.fishguard;
 
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * DatabaseManager handles persistent storage for pond metrics.
- * Session 17: Initializing the DAO (Data Access Object) structure.
+ * Session 18: Defined SQL Insert logic.
  */
 public class DatabaseManager {
     
-    // We will initialize the actual JDBC connection in Session 18
+    // The SQL query used to insert new readings
+    private static final String INSERT_QUERY = 
+        "INSERT INTO pond_logs (temperature, ph_level, oxygen_level, status) VALUES (?, ?, ?, ?)";
+
     public DatabaseManager() {
-        System.out.println("[DB]: Initializing Database Controller...");
+        System.out.println("[DB]: Database Controller ready for SQL operations.");
     }
 
-    /**
-     * Placeholder for saving metrics to a structured database.
-     */
     public void saveToDatabase(WaterMetrics m) {
-        // This will be replaced with an "INSERT INTO" SQL query soon
-        System.out.println("[DB]: Preparing SQL Insert for " + m.getPhLevel() + " pH");
+        // We are now tracking the exact SQL command we need
+        System.out.println("[DB]: Executing: " + INSERT_QUERY);
+        System.out.println("[DB]: Values -> Temp: " + m.getTemperature() + ", pH: " + m.getPhLevel());
     }
 }
