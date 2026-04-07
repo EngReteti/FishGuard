@@ -2,22 +2,20 @@ package com.fishguard;
 
 /**
  * Main entry point for FishGuard.
- * Session 10 focus: Initializing the Network Server for Phase 3.
+ * Session 20: Dynamic Configuration and Phase 4 Setup.
  */
 public class Main {
     public static void main(String[] args) {
         System.out.println("====================================");
-        System.out.println("   FISHGUARD: NETWORK INITIALIZED   ");
+        System.out.println("   FISHGUARD: DATABASE READY (80%)  ");
         System.out.println("====================================");
         
-        // We use Port 5000 for our local communication
-        NetworkManager network = new NetworkManager(5000);
+        // Initialize the manager (which now handles its own ConfigLoader)
+        NetworkManager network = new NetworkManager();
         
         // Start the server socket
         network.startServer();
         
-        System.out.println("====================================");
-        System.out.println("   Status: Waiting for Session 11   ");
         System.out.println("====================================");
     }
 }
