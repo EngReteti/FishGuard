@@ -1,22 +1,44 @@
 package com.fishguard;
 
+import java.sql.*;
+
 /**
- * DatabaseManager handles persistent storage for pond metrics.
- * Session 18: Defined SQL Insert logic.
+ * DatabaseManager handles persistent storage via JDBC.
+ * Session 21: Integrating the SQLite Connection Bridge.
  */
 public class DatabaseManager {
-    
-    // The SQL query used to insert new readings
-    private static final String INSERT_QUERY = 
-        "INSERT INTO pond_logs (temperature, ph_level, oxygen_level, status) VALUES (?, ?, ?, ?)";
+    private String dbUrl = "jdbc:sqlite:fishguard.db";
 
     public DatabaseManager() {
-        System.out.println("[DB]: Database Controller ready for SQL operations.");
+        try {
+            // Test the connection and create the table if missing
+            try (Connection conn = DriverManager.getConnection(dbUrl)) {
+                if (conn != null) {
+                    System.out.println("[DB]: Connected to SQLite database.");
+                    initializeTable(conn);
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("[DB ERROR]: Connection failed: " + e.getMessage());
+        }
+    }
+
+    private void initializeTable(Connection conn) throws SQLException {
+        String sql = "CREATE TABLE IF NOT EXISTS pond_logs ("
+                   + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                   + "timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,"
+                   + "temperature REAL,"
+                   + "ph_level REAL,"
+                   + "oxygen_level REAL"
+                   + ");";
+        try (Statement stmt = conn.createStatement()) {
+            stmt.execute(sql);
+            System.out.println("[DB]: Table 'pond_logs' is ready.");
+        }
     }
 
     public void saveToDatabase(WaterMetrics m) {
-        // We are now tracking the exact SQL command we need
-        System.out.println("[DB]: Executing: " + INSERT_QUERY);
-        System.out.println("[DB]: Values -> Temp: " + m.getTemperature() + ", pH: " + m.getPhLevel());
+        // Placeholder for the actual INSERT statement in the next bit
+        System.out.println("[DB]: Ready to insert reading into SQLite.");
     }
 }
