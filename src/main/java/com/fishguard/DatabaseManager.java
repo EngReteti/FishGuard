@@ -4,22 +4,18 @@ import java.sql.*;
 
 /**
  * DatabaseManager handles persistent storage via JDBC.
- * Session 21: Integrating the SQLite Connection Bridge.
+ * Session 22: Implementing PreparedStatements for data insertion.
  */
 public class DatabaseManager {
     private String dbUrl = "jdbc:sqlite:fishguard.db";
 
     public DatabaseManager() {
-        try {
-            // Test the connection and create the table if missing
-            try (Connection conn = DriverManager.getConnection(dbUrl)) {
-                if (conn != null) {
-                    System.out.println("[DB]: Connected to SQLite database.");
-                    initializeTable(conn);
-                }
+        try (Connection conn = DriverManager.getConnection(dbUrl)) {
+            if (conn != null) {
+                initializeTable(conn);
             }
         } catch (SQLException e) {
-            System.out.println("[DB ERROR]: Connection failed: " + e.getMessage());
+            System.out.println("[DB ERROR]: Initialization failed: " + e.getMessage());
         }
     }
 
@@ -33,12 +29,24 @@ public class DatabaseManager {
                    + ");";
         try (Statement stmt = conn.createStatement()) {
             stmt.execute(sql);
-            System.out.println("[DB]: Table 'pond_logs' is ready.");
         }
     }
 
     public void saveToDatabase(WaterMetrics m) {
-        // Placeholder for the actual INSERT statement in the next bit
-        System.out.println("[DB]: Ready to insert reading into SQLite.");
+        String sql = "INSERT INTO pond_logs(temperature, ph_level, oxygen_level) VALUES(?,?,?)";
+
+        try (Connection conn = DriverManager.getConnection(dbUrl);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setDouble(1, m.getTemperature());
+            pstmt.setDouble(2, m.getPhLevel());
+            pstmt.setDouble(3, m.getOxygen());
+            
+            pstmt.executeUpdate();
+            System.out.println("[DB]: Metrics successfully saved to SQLite.");
+            
+        } catch (SQLException e) {
+            System.out.println("[DB ERROR]: Could not save metrics: " + e.getMessage());
+        }
     }
 }
