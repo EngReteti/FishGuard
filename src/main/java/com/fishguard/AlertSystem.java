@@ -1,37 +1,16 @@
 package com.fishguard;
 
-/**
- * AlertSystem handles the logic for notifying the farmer.
- * Session 6 Upgrade: Added basic exception prevention (Null Checks).
- */
 public class AlertSystem {
+    private NotificationService notifier = new NotificationService();
 
-    /**
-     * Checks metrics against safety thresholds.
-     * Includes a safety check to ensure metrics object is not null.
-     */
-    public void checkMetrics(WaterMetrics metrics) {
-        // Defensive Programming: Check if the object exists before using it
-        if (metrics == null) {
-            System.out.println("[ERROR]: Cannot check metrics. Data reading is null.");
-            return;
+    public void checkMetrics(WaterMetrics m) {
+        // Critical Thresholds for Tilapia/Catfish
+        if (m.getOxygen() < 4.0) {
+            notifier.sendEmergencyAlert("CRITICAL: Oxygen dropped to " + m.getOxygen() + "mg/L. Aerators required!");
         }
-
-        System.out.println("\n[SYSTEM CHECKING FOR ALERTS...]");
         
-        if (metrics.getPhLevel() < 6.5 || metrics.getPhLevel() > 8.5) {
-            printAlert("pH LEVEL CRITICAL", "Check water acidity immediately!");
-        } else if (metrics.getOxygen() < 5.0) {
-            printAlert("LOW OXYGEN", "Turn on the pond aerators now!");
-        } else {
-            System.out.println("STATUS: All systems normal. Fish are happy.");
+        if (m.getPhLevel() < 6.0 || m.getPhLevel() > 8.5) {
+            notifier.sendEmergencyAlert("WARNING: pH Level is " + m.getPhLevel() + ". Water quality unstable.");
         }
-    }
-
-    private void printAlert(String title, String advice) {
-        System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-        System.out.println("!! ALERT: " + title);
-        System.out.println("!! ACTION: " + advice);
-        System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
     }
 }
